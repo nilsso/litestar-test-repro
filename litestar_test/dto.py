@@ -5,7 +5,7 @@ from litestar.contrib.sqlalchemy.dto import SQLAlchemyDTO
 from litestar.dto import DTOConfig
 from sqlalchemy import inspect
 
-from .orm import Post, PostBox, User
+from .orm import Post, User
 from .orm.base import Base
 
 ModelT = TypeVar("ModelT", bound=Base)
@@ -125,7 +125,6 @@ def _make_dtos(
 
 
 COLS_USER = _column_names(User)
-COLS_POST_BOX = _column_names(PostBox)
 COLS_POST = _column_names(Post)
 
 UserDTOs = _make_dtos(

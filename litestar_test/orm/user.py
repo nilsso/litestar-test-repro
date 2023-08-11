@@ -6,7 +6,13 @@ from .post import Post
 class User(Base):
     __tablename__ = "user"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str]
-
-    posts: Mapped[list[Post]] = relationship(back_populates="user")
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        autoincrement=True,
+        default=None,
+    )
+    posts: Mapped[list[Post]] = relationship(
+        back_populates="user",
+        default_factory=list,
+    )
