@@ -21,9 +21,9 @@ class Post(Base):
     id: Mapped[int] = mapped_column(
         primary_key=True,
         autoincrement=True,
-        default=None,
+        default=None,  # <-- comment out if not using MappedAsDataclass
     )
     user: Mapped[User] = relationship(
         back_populates="posts",
-        default=None,
+        default=None,  # <-- comment out if not using MappedAsDataclass
     )

@@ -10,9 +10,9 @@ class User(Base):
     id: Mapped[int] = mapped_column(
         primary_key=True,
         autoincrement=True,
-        default=None,
+        default=None,  # <-- comment out if not using MappedAsDataclass
     )
     posts: Mapped[list[Post]] = relationship(
         back_populates="user",
-        default_factory=list,
+        default_factory=list,  # <-- comment out if not using MappedAsDataclass
     )

@@ -61,12 +61,12 @@ class Controller(BaseController):
     @patch(
         "/update",
         summary="Update",
-        dto=PostDTOs.one,
+        dto=PostDTOs.partial,
         return_dto=PostDTOs.one,
     )
     async def update(self, id: int, *, data: Post, session: Session) -> Post:
         post = _post(session, id)
-        # post.update(**data.to_dict())
-        # session.commit()
-        # print(post.to_dict())
+        post.update(**data.to_dict())
+        session.commit()
+        print(post.to_dict())
         return post

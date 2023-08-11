@@ -8,7 +8,7 @@ from sqlalchemy.orm.attributes import get_attribute, set_attribute
 class Base(
     MappedAsDataclass,  # <--
     DeclarativeBase,
-    init=False,  # <--
+    init=False,  # <-- comment out if not using MappedAsDataclass
 ):
     __abstract__ = True
 
