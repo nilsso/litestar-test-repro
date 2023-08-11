@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "litestar-test-repro"
+version = "0.1.0"
+description = ""
+authors = ["Nils Olsson"]
+packages = [{include = "litestar_test"}]
+
+[tool.poetry.dependencies]
+python = "^3.11,<3.12"
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.19"}
+aiosqlite = "^0.19.0"
+greenlet = "^2.0.2"
+python-dotenv = "^1.0.0"
+
+[tool.poetry.dependencies.litestar]
+extras = ["standard", "sqlalchemy"]
+# version = "^2.0.0rc1"
+# version = "^2.0.0a7"
+git = "git@github.com:litestar-org/litestar.git"
+rev = "main"
+# rev = "b38189d"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length=120
