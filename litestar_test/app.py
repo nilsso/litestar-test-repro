@@ -6,12 +6,35 @@ from litestar import Controller, Litestar, get, post
 from litestar.contrib.sqlalchemy.dto import SQLAlchemyDTO
 from litestar.contrib.sqlalchemy.plugins import SQLAlchemyInitPlugin, SQLAlchemySyncConfig, SyncSessionConfig
 from litestar.dto import DTOConfig
-from sqlalchemy import create_engine, sql
-from sqlalchemy.orm import Session
+from sqlalchemy import ForeignKey, create_engine, sql
+from sqlalchemy.orm import DeclarativeBase, Mapped, MappedAsDataclass, Session, mapped_column, relationship
 
-from .base import Base
-from .post import Post
-from .user import User
+
+class Base(
+    MappedAsDataclass,
+    DeclarativeBase,
+    init=False,
+    kw_only=True,
+):
+    pass
+
+
+class User(Base, kw_only=True):
+    __tablename__ = "user"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    name: Mapped[str]
+    posts: Mapped[list[Post]] = relationship(back_populates="user", default_factory=list)
+
+
+class Post(Base, kw_only=True):
+    __tablename__ = "post"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    title: Mapped[str]
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), default=None)
+    user: Mapped[User] = relationship(back_populates="posts", default=None)
+
 
 PostDTO = SQLAlchemyDTO[Post]
 PostDTO_Create = SQLAlchemyDTO[Annotated[Post, DTOConfig(include={"title", "user_id"})]]
