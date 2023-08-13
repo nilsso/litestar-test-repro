@@ -1,69 +1,64 @@
 from __future__ import annotations
 
-from os import environ
+from typing import Annotated
 
-from dotenv import load_dotenv
-from litestar import Litestar
+from litestar import Controller, Litestar, get, post
+from litestar.contrib.sqlalchemy.dto import SQLAlchemyDTO
 from litestar.contrib.sqlalchemy.plugins import SQLAlchemyInitPlugin, SQLAlchemySyncConfig, SyncSessionConfig
-from sqlalchemy.engine import create_engine
+from litestar.dto import DTOConfig
+from sqlalchemy import create_engine, sql
 from sqlalchemy.orm import Session
 
-from .controllers.post import Controller as PostController
-from .controllers.user import Controller as UserController
-from .orm.base import Base
-from .orm import Post, User
+from .base import Base
+from .post import Post
+from .user import User
 
-CONTROLLERS = [
-    PostController,
-    UserController,
-]
+PostDTO = SQLAlchemyDTO[Post]
+PostDTO_Create = SQLAlchemyDTO[Annotated[Post, DTOConfig(include={"title", "user_id"})]]
 
-ROUTES = [
-    *CONTROLLERS,
-]
-
-load_dotenv(".env.safe")
-load_dotenv()
-
-env_db_init = (v := environ.get("DB_INIT")) and v.lower() in ("1", "true")
-env_db_uri = environ["DB_URI"]
-assert env_db_uri is not None
-print(f"Using {env_db_uri=}")
+DB_URI = "sqlite+pysqlite:///test.sqlite"
 
 
-def startup():
-    engine = create_engine(env_db_uri)
-    if env_db_init:
-        print("... Initializing")
-        Base.metadata.drop_all(engine)
+def db_init():
+    engine = create_engine(DB_URI)
+    Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
-    if env_db_init:
-        with Session(engine) as session:
-            session.add_all(
-                [
-                    User(id=1, name="User 1"),
-                    User(id=2, name="User 2"),
-                ]
-            )
-            session.add_all(
-                [
-                    Post(user_id=1, id=1, title="Foo"),
-                    Post(user_id=2, id=2, title="Bar"),
-                    Post(user_id=1, id=3, title="Baz"),
-                ]
-            )
-            session.commit()
+    with Session(engine) as session:
+        session.add(User(id=1, name="John Smith"))
+        session.add(Post(id=1, user_id=1, title="Foo"))
+        session.commit()
+
+
+class UserController(Controller):
+    path = "/user"
+    tags = ["User"]
+
+
+class PostController(Controller):
+    path = "/post"
+    tags = ["Post"]
+
+    @get(return_dto=PostDTO)
+    async def fetch_many(self, *, session: Session) -> list[Post]:
+        return list(session.scalars(sql.select(Post)))
+
+    @post("/create", dto=PostDTO_Create, return_dto=PostDTO)
+    async def create(self, *, data: Post, session: Session) -> Post:
+        post = data
+        session.add(post)
+        session.commit()
+        return post
 
 
 db_config = SQLAlchemySyncConfig(
-    connection_string=env_db_uri,
+    connection_string=DB_URI,
     session_dependency_key="session",
     session_config=SyncSessionConfig(
         expire_on_commit=False,
     ),
 )
 app = Litestar(
-    route_handlers=ROUTES,
+    route_handlers=[UserController, PostController],
     plugins=[SQLAlchemyInitPlugin(db_config)],
-    on_startup=[startup],
+    on_startup=[db_init],
 )
