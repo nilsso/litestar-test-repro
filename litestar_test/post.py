@@ -11,10 +11,10 @@ if TYPE_CHECKING:
     from .user import User
 
 
-class Post(Base, kw_only=True):
+class Post(Base):
     __tablename__ = "post"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, default=None)
     title: Mapped[str]
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), default=None)
-    user: Mapped[User] = relationship(back_populates="posts", default=None)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), default=None,)
+    user: Mapped[User] = relationship(back_populates="posts")

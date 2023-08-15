@@ -4,9 +4,9 @@ from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass
 
 
 class Base(
-    MappedAsDataclass,
+    # MappedAsDataclass,
     DeclarativeBase,
-    init=False,
-    kw_only=True,
+    # init=False,
+    # kw_only=True,
 ):
     pass

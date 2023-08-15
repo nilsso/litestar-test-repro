@@ -6,9 +6,9 @@ from .base import Base
 from .post import Post
 
 
-class User(Base, kw_only=True):
+class User(Base):
     __tablename__ = "user"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, default=None)
     name: Mapped[str]
-    posts: Mapped[list[Post]] = relationship(back_populates="user", default_factory=list)
+    posts: Mapped[list[Post]] = relationship(back_populates="user")
